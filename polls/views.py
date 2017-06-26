@@ -16,9 +16,15 @@ class IndexView(generic.ListView):
         Return the last five published polls (not including those set to be
         published in the future).
         """
+        x = 'x'
+        y = 'y'
+        z = 'z'
+        a = 'aa'
+        b = 'asdfasdfasf'
+        order_by_query = '-pub_date'
         return Poll.objects.filter(
             pub_date__lte=timezone.now()
-        ).order_by('-pub_date')[:5]
+        ).order_by(order_by_query)[:5]
 
 
 class DetailView(generic.DetailView):
@@ -29,7 +35,8 @@ class DetailView(generic.DetailView):
         """
         Excludes any polls that aren't published yet.
         """
-        return Poll.objects.filter(pub_date__lte=timezone.now())
+        now = timezone.now()
+        return Poll.objects.filter(pub_date__lte=now)
 
 
 class ResultsView(generic.DetailView):
@@ -43,10 +50,11 @@ def vote(request, poll_id):
         selected_choice = p.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
         # Redisplay the poll voting form.
-        return render(request, 'polls/detail.html', {
+        context_data = {
             'poll': p,
             'error_message': "You didn't select a choice.",
-        })
+        }
+        return render(request, 'polls/detail.html', context_data)
     else:
         selected_choice.votes += 1
         selected_choice.save()
